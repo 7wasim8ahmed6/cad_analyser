@@ -1,11 +1,15 @@
 import sys
 from PySide6.QtWidgets import QApplication
-from imageViewer import ImageViewer
+from mainWindow import MainWindow
 
 if __name__ == "__main__":
+    # app = QApplication(sys.argv)
+    # viewer = ImageViewer("sample.png")
+    # viewer.setWindowTitle("QGraphicsView Image Viewer")
+    # viewer.resize(800, 600)
+    # viewer.show()
+    # sys.exit(app.exec())
     app = QApplication(sys.argv)
-    viewer = ImageViewer("sample.png")
-    viewer.setWindowTitle("QGraphicsView Image Viewer")
-    viewer.resize(800, 600)
-    viewer.show()
+    window = MainWindow("sample.png")
+    window.show()
     sys.exit(app.exec())

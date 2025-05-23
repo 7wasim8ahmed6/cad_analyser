@@ -20,4 +20,4 @@ class ImageViewer(QGraphicsView):
         self.setScene(self.scene)
 
         # Optional: fit the image to view size
-        self.fitInView(self.pixmap_item, Qt.AspectRatioMode.KeepAspectRatio)
+        # self.fitInView(self.pixmap_item, Qt.AspectRatioMode.KeepAspectRatio)
