@@ -1,4 +1,4 @@
-from PySide6.QtCore import QPointF
+from PySide6.QtCore import QPointF, QRectF
 from PySide6.QtGui import QAction, QShortcut, QKeySequence
 from PySide6.QtWidgets import QMainWindow, QToolBar
 
@@ -15,27 +15,41 @@ class MainWindow(QMainWindow):
         self.statusBar()  # Ensure status bar is created
         # Connect the signal
         self.viewer.mouseMoved.connect(self.update_status_bar)
+        self.viewer.selectionChanged.connect(self.update_selection_status)
 
         # Setup toolbar with zoom controls
         toolbar = QToolBar("Toolbar")
         self.addToolBar(toolbar)
 
-        zoom_in_action = QAction("Zoom In", self)
+        zoom_in_action = QAction("Zoom In(I)", self)
         zoom_in_action.triggered.connect(self.viewer.zoom_in)
         toolbar.addAction(zoom_in_action)
 
-        zoom_out_action = QAction("Zoom Out", self)
+        zoom_out_action = QAction("Zoom Out(O)", self)
         zoom_out_action.triggered.connect(self.viewer.zoom_out)
         toolbar.addAction(zoom_out_action)
 
-        reset_zoom_action = QAction("Reset Zoom", self)
+        reset_zoom_action = QAction("Reset Zoom(R)", self)
         reset_zoom_action.triggered.connect(self.viewer.reset_zoom)
         toolbar.addAction(reset_zoom_action)
+
+        # Selection actions
+        select_action = QAction("Select (S)", self)
+        select_action.setCheckable(True)
+        select_action.triggered.connect(self.viewer.set_selection_mode)
+        toolbar.addAction(select_action)
+
+        clear_selection_action = QAction("Clear Selection", self)
+        clear_selection_action.triggered.connect(self.viewer.clear_selection)
+        toolbar.addAction(clear_selection_action)
 
         # ⌨️ Keyboard Shortcuts
         QShortcut(QKeySequence("i"), self, activated=self.viewer.zoom_in)
         QShortcut(QKeySequence("o"), self, activated=self.viewer.zoom_out)
         QShortcut(QKeySequence("r"), self, activated=self.viewer.reset_zoom)
+        select_shortcut = QShortcut(QKeySequence("s"), self)
+        select_shortcut.activated.connect(self.toggle_selection_mode)
+        QShortcut(QKeySequence("Escape"), self, activated=self.viewer.clear_selection)
 
     def update_status_bar(self, scene_pos: QPointF):
         x = int(scene_pos.x())
@@ -45,3 +59,22 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage(f"Pixel: ({x}, {y})")
         else:
             self.statusBar().clearMessage()
+
+    def update_selection_status(self, rect: QRectF):
+        if rect.isNull():
+            self.statusBar().showMessage("Selection cleared")
+        else:
+            pixel_rect = rect.toRect()
+            self.statusBar().showMessage(
+                f"Selection: ({pixel_rect.left()},{pixel_rect.top()}) to "
+                f"({pixel_rect.right()},{pixel_rect.bottom()}) | "
+                f"Size: {pixel_rect.width()}×{pixel_rect.height()}")
+
+    def toggle_selection_mode(self):
+        """Toggle selection mode and update action state"""
+        self.viewer.set_selection_mode(not self.viewer.selection_mode)
+        # Find and update the select action's checked state
+        for action in self.findChildren(QAction):
+            if action.text().startswith("Select"):
+                action.setChecked(self.viewer.selection_mode)
+                break
