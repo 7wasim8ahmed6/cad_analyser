@@ -8,7 +8,6 @@ class ImageViewer(QGraphicsView):
     mouseMoved = Signal(QPointF)  # Signal to send mouse position
     def __init__(self, image_path):
         super().__init__()
-        self._zoom = 0
 
         # Create scene
         self.scene = QGraphicsScene(self)
@@ -25,6 +24,7 @@ class ImageViewer(QGraphicsView):
 
         self.setMouseTracking(True)
 
+
         # Optional: fit the image to view size
         # self.fitInView(self.pixmap_item, Qt.AspectRatioMode.KeepAspectRatio)
 
@@ -37,15 +37,12 @@ class ImageViewer(QGraphicsView):
         self.setTransformationAnchor(PySide6.QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse)
         self.scale(1.25, 1.25)
         self.setTransformationAnchor(PySide6.QtWidgets.QGraphicsView.ViewportAnchor.AnchorViewCenter)
-        self._zoom += 1
 
     def zoom_out(self):
         self.setTransformationAnchor(PySide6.QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse)
         self.scale(0.8, 0.8)
         self.setTransformationAnchor(PySide6.QtWidgets.QGraphicsView.ViewportAnchor.AnchorViewCenter)
-        self._zoom -= 1
 
     def reset_zoom(self):
         self.resetTransform()
         self.fitInView(self.pixmap_item, Qt.AspectRatioMode.KeepAspectRatio)
-        self._zoom = 0
