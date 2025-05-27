@@ -102,7 +102,19 @@ class ImageViewer(QGraphicsView):
         self.resetTransform()
         self.fitInView(self.pixmap_item, Qt.AspectRatioMode.KeepAspectRatio)
 
-    def get_selected_pixmap(self):
+    def get_selected_pixmap_with_coords(self):
+        """Returns a tuple of (pixmap, top_left, bottom_right) or None if no selection"""
         if not self.selection_rect:
             return None
-        return self.pixmap_item.pixmap().copy(self.selection_rect.rect().toRect())
+
+        # Get the selection rectangle in scene coordinates
+        selection_rect = self.selection_rect.rect()
+
+        # Convert to integer pixel coordinates in the original image
+        top_left = selection_rect.topLeft().toPoint()
+        bottom_right = selection_rect.bottomRight().toPoint()
+
+        # Get the pixmap portion
+        pixmap = self.pixmap_item.pixmap().copy(selection_rect.toRect())
+
+        return (pixmap, top_left, bottom_right)

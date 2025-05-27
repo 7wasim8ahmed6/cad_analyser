@@ -1,4 +1,4 @@
-from PySide6.QtCore import QPointF, QRectF
+from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QAction, QShortcut, QKeySequence
 from PySide6.QtWidgets import QMainWindow, QToolBar, QDialog, QLabel, QVBoxLayout
 
@@ -85,20 +85,31 @@ class MainWindow(QMainWindow):
                 break
 
     def find_similar_portions(self):
-        lPixmap = self.viewer.get_selected_pixmap()
+        lPixmap, top_left, bottom_right = self.viewer.get_selected_pixmap_with_coords()
         if lPixmap is None:
             print("Pixmap is none")
             return
 
-        # Create a dialog to display the selected pixmap
+        # Create dialog
         dialog = QDialog(self)
         dialog.setWindowTitle("Selected Region Preview")
 
-        label = QLabel()
-        label.setPixmap(lPixmap)
+        # Coordinates label
+        coords_label = QLabel(
+            f"Top-left: ({top_left.x():.0f}, {top_left.y():.0f}) | "
+            f"Bottom-right: ({bottom_right.x():.0f}, {bottom_right.y():.0f})"
+        )
+        coords_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        # Pixmap label
+        image_label = QLabel()
+        image_label.setPixmap(lPixmap)
+
+
+        # Layout
         layout = QVBoxLayout()
-        layout.addWidget(label)
-        dialog.setLayout(layout)
+        layout.addWidget(coords_label)
+        layout.addWidget(image_label)
 
+        dialog.setLayout(layout)
         dialog.exec()
