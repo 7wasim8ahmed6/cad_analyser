@@ -104,5 +104,5 @@ class ImageViewer(QGraphicsView):
 
     def get_selected_pixmap(self):
         if not self.selection_rect:
-            return QPixmap()
+            return None
         return self.pixmap_item.pixmap().copy(self.selection_rect.rect().toRect())

@@ -1,6 +1,6 @@
 from PySide6.QtCore import QPointF, QRectF
 from PySide6.QtGui import QAction, QShortcut, QKeySequence
-from PySide6.QtWidgets import QMainWindow, QToolBar
+from PySide6.QtWidgets import QMainWindow, QToolBar, QDialog, QLabel, QVBoxLayout
 
 from imageViewer import ImageViewer
 
@@ -43,6 +43,10 @@ class MainWindow(QMainWindow):
         clear_selection_action.triggered.connect(self.viewer.clear_selection)
         toolbar.addAction(clear_selection_action)
 
+        find_similarity_action = QAction("Find (F)", self)
+        find_similarity_action.triggered.connect(self.find_similar_portions)
+        toolbar.addAction(find_similarity_action)
+
         # ⌨️ Keyboard Shortcuts
         QShortcut(QKeySequence("i"), self, activated=self.viewer.zoom_in)
         QShortcut(QKeySequence("o"), self, activated=self.viewer.zoom_out)
@@ -50,6 +54,7 @@ class MainWindow(QMainWindow):
         select_shortcut = QShortcut(QKeySequence("s"), self)
         select_shortcut.activated.connect(self.toggle_selection_mode)
         QShortcut(QKeySequence("Escape"), self, activated=self.viewer.clear_selection)
+        QShortcut(QKeySequence("F"), self, activated=self.find_similar_portions)
 
     def update_status_bar(self, scene_pos: QPointF):
         x = int(scene_pos.x())
@@ -78,3 +83,22 @@ class MainWindow(QMainWindow):
             if action.text().startswith("Select"):
                 action.setChecked(self.viewer.selection_mode)
                 break
+
+    def find_similar_portions(self):
+        lPixmap = self.viewer.get_selected_pixmap()
+        if lPixmap is None:
+            print("Pixmap is none")
+            return
+
+        # Create a dialog to display the selected pixmap
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Selected Region Preview")
+
+        label = QLabel()
+        label.setPixmap(lPixmap)
+
+        layout = QVBoxLayout()
+        layout.addWidget(label)
+        dialog.setLayout(layout)
+
+        dialog.exec()
