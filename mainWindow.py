@@ -1,8 +1,9 @@
 from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QAction, QShortcut, QKeySequence
-from PySide6.QtWidgets import QMainWindow, QToolBar, QDialog, QLabel, QVBoxLayout
+from PySide6.QtWidgets import QMainWindow, QToolBar, QDialog, QLabel, QVBoxLayout, QFileDialog
 
 from imageViewer import ImageViewer
+from pdfToImage import select_and_convert_pdf_and_save
 
 
 class MainWindow(QMainWindow):
@@ -47,6 +48,10 @@ class MainWindow(QMainWindow):
         find_similarity_action.triggered.connect(self.find_similar_portions)
         toolbar.addAction(find_similarity_action)
 
+        convertAndLoadAction = QAction("convert pdf", self)
+        convertAndLoadAction.triggered.connect(self.convert_pdf)
+        toolbar.addAction(convertAndLoadAction)
+
         # ⌨️ Keyboard Shortcuts
         QShortcut(QKeySequence("i"), self, activated=self.viewer.zoom_in)
         QShortcut(QKeySequence("o"), self, activated=self.viewer.zoom_out)
@@ -55,6 +60,11 @@ class MainWindow(QMainWindow):
         select_shortcut.activated.connect(self.toggle_selection_mode)
         QShortcut(QKeySequence("Escape"), self, activated=self.viewer.clear_selection)
         QShortcut(QKeySequence("F"), self, activated=self.find_similar_portions)
+
+
+    def convert_pdf(self):
+        select_and_convert_pdf_and_save(self, 200)
+
 
     def update_status_bar(self, scene_pos: QPointF):
         x = int(scene_pos.x())
