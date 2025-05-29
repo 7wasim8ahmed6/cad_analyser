@@ -1,9 +1,9 @@
 from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QAction, QShortcut, QKeySequence
-from PySide6.QtWidgets import QMainWindow, QToolBar, QDialog, QLabel, QVBoxLayout, QFileDialog
+from PySide6.QtWidgets import QMainWindow, QToolBar, QDialog, QLabel, QVBoxLayout
 
 from imageViewer import ImageViewer
-from pdfToImage import select_and_convert_pdf_and_save
+from Utils import *
 
 
 class MainWindow(QMainWindow):
@@ -48,9 +48,13 @@ class MainWindow(QMainWindow):
         find_similarity_action.triggered.connect(self.find_similar_portions)
         toolbar.addAction(find_similarity_action)
 
-        convertAndLoadAction = QAction("convert pdf", self)
-        convertAndLoadAction.triggered.connect(self.convert_pdf)
-        toolbar.addAction(convertAndLoadAction)
+        convertPDFAction = QAction("convert pdf", self)
+        convertPDFAction.triggered.connect(self.convert_pdf)
+        toolbar.addAction(convertPDFAction)
+
+        loadImagesAction = QAction("Load Images", self)
+        loadImagesAction.triggered.connect(self.loadImgs)
+        toolbar.addAction(loadImagesAction)
 
         # ⌨️ Keyboard Shortcuts
         QShortcut(QKeySequence("i"), self, activated=self.viewer.zoom_in)
@@ -61,6 +65,13 @@ class MainWindow(QMainWindow):
         QShortcut(QKeySequence("Escape"), self, activated=self.viewer.clear_selection)
         QShortcut(QKeySequence("F"), self, activated=self.find_similar_portions)
 
+    def loadImgs(self):
+        folder_path = ask_for_folder(self, "Select Folder with Images")
+        if folder_path:
+            print("Selected folder:", folder_path)
+
+            image_files = get_images_from_folder(folder_path)
+            print("Images found:", image_files)
 
     def convert_pdf(self):
         select_and_convert_pdf_and_save(self, 200)

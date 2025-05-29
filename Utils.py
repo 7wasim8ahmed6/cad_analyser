@@ -50,3 +50,16 @@ def select_and_convert_pdf_and_save(parent=None, dpi=300, fmt='png'):
     except Exception as e:
         QMessageBox.critical(parent, "Conversion Error", f"Failed to convert PDF:\n{e}")
         return None
+
+def ask_for_folder(parent=None, title="Select Folder"):
+    folder = QFileDialog.getExistingDirectory(
+        parent,
+        title,
+        "",  # Starting directory
+        QFileDialog.Option.ShowDirsOnly
+    )
+    return folder if folder else None
+
+def get_images_from_folder(folder_path):
+    folder = Path(folder_path)
+    return sorted([str(f) for f in folder.iterdir() if f.suffix.lower() in {'.png', '.jpg', '.jpeg'}])
