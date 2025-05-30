@@ -1,17 +1,18 @@
 from PySide6.QtCore import QPointF, QRectF, Qt
-from PySide6.QtGui import QAction, QShortcut, QKeySequence
+from PySide6.QtGui import QAction, QShortcut, QKeySequence, QKeyEvent
 from PySide6.QtWidgets import QMainWindow, QToolBar, QDialog, QLabel, QVBoxLayout
 
 from imageViewer import ImageViewer
 from Utils import *
 
-
 class MainWindow(QMainWindow):
-    def __init__(self, image_path):
+    def __init__(self):
         super().__init__()
+        self.image_files = []
+        self.CurrentIndex = -1
         self.setWindowTitle("Image Viewer")
         self.resize(1000, 800)
-        self.viewer = ImageViewer(image_path)
+        self.viewer = ImageViewer()
         self.setCentralWidget(self.viewer)
         self.statusBar()  # Ensure status bar is created
         # Connect the signal
@@ -21,6 +22,14 @@ class MainWindow(QMainWindow):
         # Setup toolbar with zoom controls
         toolbar = QToolBar("Toolbar")
         self.addToolBar(toolbar)
+
+        convertPDFAction = QAction("convert pdf", self)
+        convertPDFAction.triggered.connect(self.convert_pdf)
+        toolbar.addAction(convertPDFAction)
+
+        loadImagesAction = QAction("Load Images", self)
+        loadImagesAction.triggered.connect(self.loadImgs)
+        toolbar.addAction(loadImagesAction)
 
         zoom_in_action = QAction("Zoom In(I)", self)
         zoom_in_action.triggered.connect(self.viewer.zoom_in)
@@ -48,14 +57,6 @@ class MainWindow(QMainWindow):
         find_similarity_action.triggered.connect(self.find_similar_portions)
         toolbar.addAction(find_similarity_action)
 
-        convertPDFAction = QAction("convert pdf", self)
-        convertPDFAction.triggered.connect(self.convert_pdf)
-        toolbar.addAction(convertPDFAction)
-
-        loadImagesAction = QAction("Load Images", self)
-        loadImagesAction.triggered.connect(self.loadImgs)
-        toolbar.addAction(loadImagesAction)
-
         # ⌨️ Keyboard Shortcuts
         QShortcut(QKeySequence("i"), self, activated=self.viewer.zoom_in)
         QShortcut(QKeySequence("o"), self, activated=self.viewer.zoom_out)
@@ -70,11 +71,27 @@ class MainWindow(QMainWindow):
         if folder_path:
             print("Selected folder:", folder_path)
 
-            image_files = get_images_from_folder(folder_path)
-            print("Images found:", image_files)
+            self.image_files = get_images_from_folder(folder_path)
+            if not self.image_files:
+                print("No Images :(")
+                return
+
+            print(f"Loading image {self.image_files[0]}")
+            self.CurrentIndex = 0
+            self.viewer.loadImage(self.image_files[self.CurrentIndex])
 
     def convert_pdf(self):
         select_and_convert_pdf_and_save(self, 200)
+
+    def keyPressEvent(self, event: QKeyEvent):
+        # Cmd on macOS is mapped to Ctrl by Qt for cross-platform compatibility
+        if event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+            if event.key() == Qt.Key.Key_N:
+                self.on_next()
+            elif event.key() == Qt.Key.Key_P:
+                self.on_previous()
+        else:
+            super().keyPressEvent(event)
 
 
     def update_status_bar(self, scene_pos: QPointF):
@@ -134,3 +151,15 @@ class MainWindow(QMainWindow):
 
         dialog.setLayout(layout)
         dialog.exec()
+
+    def on_next(self):
+        self.CurrentIndex += 1
+        if self.CurrentIndex == len(self.image_files):
+           self.CurrentIndex -= 1
+        self.viewer.loadImage(self.image_files[self.CurrentIndex])
+
+    def on_previous(self):
+        self.CurrentIndex -= 1
+        if self.CurrentIndex == -1:
+            self.CurrentIndex += 1
+        self.viewer.loadImage(self.image_files[self.CurrentIndex])

@@ -9,18 +9,13 @@ from SelectionRect import SelectionRectItem
 class ImageViewer(QGraphicsView):
     mouseMoved = Signal(QPointF)  # Signal to send mouse position
     selectionChanged = Signal(QRectF)  # New signal for selection changes
-    def __init__(self, image_path):
+
+    def __init__(self):
         super().__init__()
 
         # Create scene
+        self.pixmap_item = None
         self.scene = QGraphicsScene(self)
-
-        # Load image into QPixmap
-        pixmap = QPixmap(image_path)
-
-        # Add QPixmap to scene
-        self.pixmap_item = QGraphicsPixmapItem(pixmap)
-        self.scene.addItem(self.pixmap_item)
 
         # Set scene to view
         self.setScene(self.scene)
@@ -33,16 +28,22 @@ class ImageViewer(QGraphicsView):
         self.selecting = False
         self.selection_mode = False
 
-
-        # Optional: fit the image to view size
-        # self.fitInView(self.pixmap_item, Qt.AspectRatioMode.KeepAspectRatio)
-
     def set_selection_mode(self, enabled):
         self.selection_mode = enabled
-        # if enabled:
-        #     self.setDragMode(PySide6.QtWidgets.QGraphicsView.NoDrag)
-        # else:
-        #     self.setDragMode(PySide6.QtWidgets.QGraphicsView.ScrollHandDrag)
+
+    def loadImage(self, image_path: str):
+        # Remove existing image item if any
+        if hasattr(self, 'pixmap_item') and self.pixmap_item is not None:
+            self.scene.removeItem(self.pixmap_item)
+            self.pixmap_item = None
+
+        # Load and add new image
+        pixmap = QPixmap(image_path)
+        self.pixmap_item = QGraphicsPixmapItem(pixmap)
+        self.scene.addItem(self.pixmap_item)
+
+        # Fit the new image to view
+        self.fitInView(self.pixmap_item, Qt.AspectRatioMode.KeepAspectRatio)
 
     def clear_selection(self):
         if self.selection_rect:
@@ -88,6 +89,7 @@ class ImageViewer(QGraphicsView):
             return
 
         super().mouseReleaseEvent(event)
+
     def zoom_in(self):
         self.setTransformationAnchor(PySide6.QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse)
         self.scale(1.25, 1.25)
