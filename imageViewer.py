@@ -31,12 +31,20 @@ class ImageViewer(QGraphicsView):
     def set_selection_mode(self, enabled):
         self.selection_mode = enabled
 
+    def resetSelection(self):
+        # Selection variables
+        self.selection_rect = None
+        self.selection_start = QPointF()
+        self.selecting = False
+        self.selection_mode = False
+
     def loadImage(self, image_path: str):
         # Remove existing image item if any
         if hasattr(self, 'pixmap_item') and self.pixmap_item is not None:
             self.scene.removeItem(self.pixmap_item)
             self.pixmap_item = None
 
+        self.resetSelection()
         # Load and add new image
         pixmap = QPixmap(image_path)
         self.pixmap_item = QGraphicsPixmapItem(pixmap)
