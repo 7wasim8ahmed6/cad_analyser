@@ -2,8 +2,8 @@ from PySide6.QtCore import QPointF, QRectF, Qt
 from PySide6.QtGui import QAction, QShortcut, QKeySequence, QKeyEvent
 from PySide6.QtWidgets import QMainWindow, QToolBar, QDialog, QLabel, QVBoxLayout
 
+from Utils import FileUtils
 from imageViewer import ImageViewer
-from Utils import *
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -67,11 +67,11 @@ class MainWindow(QMainWindow):
         QShortcut(QKeySequence("F"), self, activated=self.find_similar_portions)
 
     def loadImgs(self):
-        folder_path = ask_for_folder(self, "Select Folder with Images")
+        folder_path = FileUtils.ask_for_folder(self, "Select Folder with Images")
         if folder_path:
             print("Selected folder:", folder_path)
 
-            self.image_files = get_images_from_folder(folder_path)
+            self.image_files = FileUtils.get_images_from_folder(folder_path)
             if not self.image_files:
                 print("No Images :(")
                 return
@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
             self.viewer.loadImage(self.image_files[self.CurrentIndex])
 
     def convert_pdf(self):
-        select_and_convert_pdf_and_save(self, 200)
+        FileUtils.select_and_convert_pdf_and_save(self, 200)
 
     def keyPressEvent(self, event: QKeyEvent):
         # Cmd on macOS is mapped to Ctrl by Qt for cross-platform compatibility
